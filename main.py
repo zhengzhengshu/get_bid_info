@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 import threading
 
 options = Options()
-executable_path = '/Users/aaronbrant/Downloads/chromedriver'
+executable_path = './chromedriver'
 if sys.platform == 'win32':
     options.binary_path = './chrome/chrome.exe'
     options.add_argument("--user-data-dir=chrome/UserData")
