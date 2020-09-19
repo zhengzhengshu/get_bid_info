@@ -39,17 +39,17 @@ def do_auto_task(begin_num, end_num):
         url =  url_template.format(num_text)
         logger.info(url)
         browser.visit(url)
-        time.sleep(3)
+        browser.driver.switch_to.frame(0)
+        browser.is_element_present_by_css(".stdColumnLinkContent",wait_time= 10)
+        #找到对应的元素
         html = browser.html
         row = get_data_from_source(num_text,html)
         logger.info(f"获取招标信息: {','.join(row)}")
         #write_to_excel
         for col_index,col in enumerate(row):
             sheet1.write(row_index,col_index,col)
-
         begin_num += 1
         row_index += 1
-
 
     #close_excel
     sheet1.col(0).width = 10*256
@@ -98,7 +98,7 @@ def get_data_from_source(begin_num,html):
 if __name__ == "__main__":
     url1 = "https://ec.mcc.com.cn/logonAction.do?source=validateCode"
     logger.info("请在即将打开的浏览器上手动登陆，登陆成功后，在此处按回车确认")
-    browser = Browser(driver_name="chrome", executable_path=executable_path, options=options)
+    browser = Browser(driver_name="chrome", executable_path='./chromedriver', options=options)
     browser.visit(url1)
     time.sleep(5)
     ok = input("如果已经成功登陆，请回车")
