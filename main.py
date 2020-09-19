@@ -58,7 +58,7 @@ def do_auto_task(begin_num, end_num):
     sheet1.col(3).width = 50*256
     sheet1.col(4).width = 30*256
     sheet1.col(5).width = 30*256
-    f.save(f"招标标数据-{time.strftime('%Y%m%d')}.xlsx")
+    f.save(f"招标数据{time.strftime('%Y%m%d')}.xls")
     logger.info("写入excel完成")
 
 
@@ -97,7 +97,7 @@ def get_data_from_source(begin_num,html):
 
 if __name__ == "__main__":
     url1 = "https://ec.mcc.com.cn/logonAction.do?source=validateCode"
-    logger.info("请在即将打开的浏览器上手动登陆，输入验证码登陆成功后，再此处按回车确认")
+    logger.info("请在即将打开的浏览器上手动登陆，登陆成功后，在此处按回车确认")
     browser = Browser(driver_name="chrome", executable_path=executable_path, options=options)
     browser.visit(url1)
     time.sleep(5)
@@ -106,4 +106,5 @@ if __name__ == "__main__":
     end_num = int(input("请输入结束编号"))
     logger.info(f"起始编号：{begin_num}, 结束编号：{end_num}")
     do_auto_task(begin_num,end_num)
+    browser.quit()
     logger.info("程序运行结束")
