@@ -8,6 +8,7 @@ from log import logger
 from splinter import Browser
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
+import threading
 
 options = Options()
 executable_path = '/Users/aaronbrant/Downloads/chromedriver'
@@ -20,9 +21,9 @@ options.add_experimental_option(
     "excludeSwitches", ["enable-automation"]
 )  # 绕过js检测
 
-browser = None
+file_num = 0
 
-def do_auto_task(begin_num, end_num):
+def do_auto_task(begin_num, end_num, file_num):
     global browser 
     url_template = "https://ec.mcc.com.cn/common/modal.jsp?url=/bidAction.do@actionType=toBidB2bView!bidid={}"
     #open_excel
@@ -48,6 +49,8 @@ def do_auto_task(begin_num, end_num):
         #write_to_excel
         for col_index,col in enumerate(row):
             sheet1.write(row_index,col_index,col)
+
+        f.save(f"招标数据{time.strftime('%Y%m%d')}_{ file_num }.xls")
         begin_num += 1
         row_index += 1
 
@@ -58,7 +61,7 @@ def do_auto_task(begin_num, end_num):
     sheet1.col(3).width = 50*256
     sheet1.col(4).width = 30*256
     sheet1.col(5).width = 30*256
-    f.save(f"招标数据{time.strftime('%Y%m%d')}.xls")
+    f.save(f"招标数据{time.strftime('%Y%m%d')}_{ file_num }.xls")
     logger.info("写入excel完成")
 
 
@@ -95,16 +98,40 @@ def get_data_from_source(begin_num,html):
         gysmc = ""
     return [begin_num,zbbm,zbbh,zbmc,tpkbsj,gysmc]
 
+def main():
+    global file_num,browser
+    while True:
+        try:
+            file_num += 1  
+            begin_num = int(input("请输入起始编号 "))
+            end_num = int(input("请输入结束编号 "))
+            logger.info(f"起始编号：{begin_num}, 结束编号：{end_num}, 第{ file_num }次爬取")
+            do_auto_task(begin_num,end_num,file_num)
+        except KeyboardInterrupt:
+            print("本次爬取被终止")
+            break;
+
+
 if __name__ == "__main__":
     url1 = "https://ec.mcc.com.cn/logonAction.do?source=validateCode"
-    logger.info("请在即将打开的浏览器上手动登陆，登陆成功后，在此处按回车确认")
-    browser = Browser(driver_name="chrome", executable_path='./chromedriver', options=options)
+    print("请在即将打开的浏览器上手动登陆，登陆成功后，在此处按回车确认")
+    #browser = Browser(driver_name="chrome", executable_path=executable_path, options=options)
+    browser = Browser(driver_name="chrome", executable_path=executable_path, options=options)
     browser.visit(url1)
     time.sleep(5)
-    ok = input("如果已经成功登陆，请回车")
-    begin_num = int(input("请输入起始编号"))
-    end_num = int(input("请输入结束编号"))
-    logger.info(f"起始编号：{begin_num}, 结束编号：{end_num}")
-    do_auto_task(begin_num,end_num)
+    ok = input("如果已经成功登陆，请回车 ")
+    while True:
+        try:
+            file_num += 1  
+            begin_num = int(input("请输入起始编号 "))
+            end_num = int(input("请输入结束编号 "))
+            logger.info(f"起始编号：{begin_num}, 结束编号：{end_num}, 第{ file_num }次爬取")
+            do_auto_task(begin_num,end_num,file_num)
+        except:
+            print("浏览器已经退出，需要重新登录")
+            ok = input("如果已经成功登陆，请回车 ")
+            browser = Browser(driver_name="chrome", executable_path=executable_path, options=options)
+            browser.visit(url1)
+            time.sleep(5)
     browser.quit()
     logger.info("程序运行结束")
